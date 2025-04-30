@@ -30,7 +30,7 @@ public class ApplicationExpression extends Expression {
      */
     public ApplicationExpression() {
         super(ExpressionType.APPLICATION);
-        setArguments(new ArrayList<Expression>());
+        setArguments(new ArrayList<>());
     }
 
     /**
@@ -74,22 +74,20 @@ public class ApplicationExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
     @Override
     public String toString() {
-        String string = "{\"" + APPLICATION_KEYWORD + "\":[";
+        StringBuilder string = new StringBuilder("{\"" + APPLICATION_KEYWORD + "\":[");
         for (int i = 0; i < arguments.size(); i++) {
-            string += arguments.get(i).toString();
+            string.append(arguments.get(i).toString());
             if (i < arguments.size() - 1) {
-                string += ",";
+                string.append(",");
             }
         }
-        string += "]}";
-        return string;
+        string.append("]}");
+        return string.toString();
     }
 
 }

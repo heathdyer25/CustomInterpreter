@@ -20,7 +20,7 @@ public class BlockExpression extends Expression {
      */
     public BlockExpression() {
         super(ExpressionType.BLOCK);
-        setBlock(new ArrayList<Expression>());
+        setBlock(new ArrayList<>());
     }
 
     /**
@@ -66,22 +66,20 @@ public class BlockExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
     @Override
     public String toString() {
-        String string = "{\"" + BLOCK_KEYWORD + "\":[";
+        StringBuilder string = new StringBuilder("{\"" + BLOCK_KEYWORD + "\":[");
         for (int i = 0; i < block.size(); i++) {
-            string += block.get(i).toString();
+            string.append(block.get(i).toString());
             if (i < block.size() - 1) {
-                string += ",";
+                string.append(",");
             }
         }
-        string += "]}";
-        return string;
+        string.append("]}");
+        return string.toString();
     }
 
 

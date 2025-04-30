@@ -19,11 +19,10 @@ public class ParametersExpression extends Expression {
 
     /**
      * Constructs new parameters expression with empty list of parameters
-     * @param parameters List of identifier expressions to set
      */
     public ParametersExpression() {
         super(ExpressionType.PARAMETERS);
-        this.parameters = new ArrayList<IdentifierExpression>();
+        this.parameters = new ArrayList<>();
     }
 
     /**
@@ -64,15 +63,15 @@ public class ParametersExpression extends Expression {
 
     @Override
     public String toString() {
-        String string = "{\"" + PARAMETERS_KEYWORD + "\":[";
+        StringBuilder string = new StringBuilder("{\"" + PARAMETERS_KEYWORD + "\":[");
         for (int i = 0; i < parameters.size(); i++) {
-            string += parameters.get(i).toString();
+            string.append(parameters.get(i).toString());
             if (i < parameters.size() - 1) {
-                string += ",";
+                string.append(",");
             }
         }
-        string += "]}";
-        return string;
+        string.append("]}");
+        return string.toString();
     }
 
     @Override
@@ -82,9 +81,7 @@ public class ParametersExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
 

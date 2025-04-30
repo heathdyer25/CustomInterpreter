@@ -43,12 +43,12 @@ public abstract class Util {
     public static String getInput() throws IOException {
         //Get all input from standard in
         BufferedReader inputReader = null;
-        String input = "";
+        StringBuilder input = new StringBuilder();
         try {
             inputReader = new BufferedReader(new InputStreamReader(System.in));
             String line;
             while ((line = inputReader.readLine()) != null) {
-                input += line;
+                input.append(line);
             }
         }
         //Catch IO errors
@@ -61,7 +61,7 @@ public abstract class Util {
                 inputReader.close();
             }
         }
-        return input;
+        return input.toString();
     }
 
     /**

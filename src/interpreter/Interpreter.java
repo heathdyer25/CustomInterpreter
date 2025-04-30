@@ -16,11 +16,11 @@ public class Interpreter {
     /**
      * If true, enables tracing during evaluation
      */
-    private boolean tracing;
+    private final boolean tracing;
     /**
      * If false, enables dynamic scoping
      */
-    private boolean lexicalScope;
+    private final boolean lexicalScope;
 
     /**
      * Constructor for Interpreter class. Initializes environment and
@@ -33,8 +33,8 @@ public class Interpreter {
     /**
      * Constructor for Interpreter class. Allows you to specify if you
      * want to enable tracing or not.
-     *
-     * @param tracing
+     * @param tracing Enables or disables lexical scoping
+	 * @param lexicalScope Sets lexical scoping to this value
      */
     public Interpreter(boolean tracing, boolean lexicalScope) {
         this.tracing = tracing;
@@ -243,7 +243,7 @@ public class Interpreter {
         //get operator
         Expression operator = evaluate(exp.getArguments().get(0), env);
         //get operands
-        List<Expression> operands = new LinkedList<Expression>();
+        List<Expression> operands = new LinkedList<>();
         for (Expression argument : exp.getArguments().subList(1, exp.getArguments().size())) {
             operands.add(evaluate(argument, env));
         }
@@ -259,7 +259,7 @@ public class Interpreter {
                     lexicalScope && lambda.getEnvironment() != null ? lambda.getEnvironment() : env);
             return evaluate(lambda.getBlock(), extendedEnv);
         }
-        throw new RuntimeException("Not a built in procedure " + exp.toString());
+        throw new RuntimeException("Not a built in procedure " + exp);
     }
 
     /**
@@ -337,54 +337,41 @@ public class Interpreter {
     public Expression evaluate(Expression exp, Environment env) {
         //prints tracing statement
         if (tracing) {
-            System.out.println("Evaluating " + exp.getType().toString() + " expression: " + exp.toString());
+            System.out.println("Evaluating " + exp.getType().toString() + " expression: " + exp);
         }
         //based on expression type, evaluate expression
-        switch (exp.getType()) {
+        //otherwise unknown expression type
+        return switch (exp.getType()) {
             //is number?
-            case INTEGER:
-                return (IntegerExpression) exp;
+            case INTEGER -> exp;
             //is string?
-            case STRING:
-                return (StringExpression) exp;
+            case STRING -> exp;
             //is boolean?
-            case BOOLEAN:
-                return (BooleanExpression) exp;
+            case BOOLEAN -> exp;
             //is a lambda expression or function?
-            case LAMBDA:
-                return (LambdaExpression) exp;
+            case LAMBDA -> exp;
             //case is list?
-            case LIST:
-                return (ListExpression) exp;
+            case LIST -> exp;
             //is build in operator?
-            case PROCEDURE:
-                return (ProcedureExpression) exp;
+            case PROCEDURE -> exp;
             //is block expression?
-            case BLOCK:
-                return executeBlock((BlockExpression) exp, env);
+            case BLOCK -> executeBlock((BlockExpression) exp, env);
             //is conditional expression?
-            case COND:
-                return applyConditional((ConditionalExpression) exp, env);
+            case COND -> applyConditional((ConditionalExpression) exp, env);
             //is let expression?
-            case LET:
-                return applyLet((LetExpression) exp, env);
+            case LET -> applyLet((LetExpression) exp, env);
             //is definition expression?
-            case DEFINITION:
-                return applyDefinition((DefinitionExpression) exp, env);
+            case DEFINITION -> applyDefinition((DefinitionExpression) exp, env);
             //is assignment?
-            case ASSIGNMENT:
-                return performAssignment((AssignmentExpression) exp, env);
-            //is application of built in function?
-            case APPLICATION:
-                return applyFunction((ApplicationExpression) exp, env);
+            case ASSIGNMENT -> performAssignment((AssignmentExpression) exp, env);
+            //is application of built-in function?
+            case APPLICATION -> applyFunction((ApplicationExpression) exp, env);
             //is symbol/identifier?
-            case IDENTIFIER:
-                return lookup((IdentifierExpression) exp, env);
-            case DUMMY:
-                throw new RuntimeException("Interpreter tried evaluating dummy value bound during def expression.");
-                //otherwise unknown expression type
-            default:
-                throw new RuntimeException("Expression " + exp.getType().toString() + " is supported by the JSON deserializer but not the interpreter.");
-        }
+            case IDENTIFIER -> lookup((IdentifierExpression) exp, env);
+            case DUMMY ->
+                    throw new RuntimeException("Interpreter tried evaluating dummy value bound during def expression.");
+            default ->
+                    throw new RuntimeException("Expression " + exp.getType().toString() + " is supported by the JSON deserializer but not the interpreter.");
+        };
     }
 }

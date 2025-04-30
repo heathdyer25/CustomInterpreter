@@ -45,7 +45,7 @@ public abstract class Expression {
     public static final String CLAUSE_KEYWORD = "Clause";
     /** Keyword for argument list of a lambda function */
     public static final String ARGLIST_KEYWORD = "Arglist";
-    /** Keyword for procedure, built in functions for language */
+    /** Keyword for procedure, built-in functions for language */
     public static final String PROCEDURE_KEYWORD = "Procedure";
     /** Keyword for list, built in data structure for language */
     public static final String LIST_KEYWORD = "List";
@@ -84,7 +84,7 @@ public abstract class Expression {
     /**
      * Sets type of token
      * @param type Type of token
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException throws when expression type is null
      */
     public void setType(ExpressionType type) {
         if (type == null) {

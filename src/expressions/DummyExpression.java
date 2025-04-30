@@ -10,7 +10,7 @@ import java.util.Objects;
 public class DummyExpression extends Expression {
 
     /**
-     * Constrcuts new dummy value
+     * Constructs new dummy value
      */
     public DummyExpression() {
         super(ExpressionType.DUMMY);
@@ -28,9 +28,7 @@ public class DummyExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (getClass() == obj.getClass())
-            return true;
-        return false;
+        return getClass() == obj.getClass();
     }
 
 

@@ -20,19 +20,15 @@ public class GUI extends JFrame {
     /**
      * Where the code goes
      */
-    private JTextPane codeArea;
+    private final JTextPane codeArea;
     /**
      * Where the output goes
      */
-    private JTextPane outputArea;
-    /**
-     * Run button
-     */
-    private JButton runButton;
+    private final JTextPane outputArea;
     /**
      * Divider
      */
-    private JSplitPane splitPane;
+    private final JSplitPane splitPane;
     /**
      * File chooser
      */
@@ -77,7 +73,7 @@ public class GUI extends JFrame {
         splitPane.setResizeWeight(0.5);
 
         // Set up the run button
-        runButton = new JButton("Run");
+        JButton runButton = new JButton("Run");
 
         // Layout
         setLayout(new BorderLayout());

@@ -47,8 +47,8 @@ public class DefinitionExpression extends Expression {
     }
 
     /**
-     * Sets lambda expression of function definition
-     * @param lambda Lambda expression to set
+     * Sets expression of function definition
+     * @param expression Expression to set
      */
     public void setExpression(Expression expression) {
         if (expression == null) {
@@ -58,7 +58,7 @@ public class DefinitionExpression extends Expression {
     }
 
     /**
-     * Gets lambda expression for function definition
+     * Gets expression for function definition
      * @return Returns lambda expression
      */
     public Expression getExpression() {
@@ -72,9 +72,7 @@ public class DefinitionExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
     @Override

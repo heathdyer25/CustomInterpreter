@@ -57,15 +57,12 @@ public class ProcedureExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
     @Override
     public String toString() {
-        String string = "{\"" + PROCEDURE_KEYWORD + "\":" + function.toString() + "}";
-        return string;
+        return "{\"" + PROCEDURE_KEYWORD + "\":" + function.toString() + "}";
     }
 
 }

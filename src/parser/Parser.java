@@ -41,7 +41,6 @@ public class Parser {
                 return null;
             }
             token = tokens.get(current);
-            ;
         }
         return token;
     }
@@ -59,7 +58,6 @@ public class Parser {
                 return null;
             }
             token = tokens.get(i);
-            ;
         }
         return token;
     }

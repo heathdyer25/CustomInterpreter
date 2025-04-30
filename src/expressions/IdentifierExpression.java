@@ -32,8 +32,8 @@ public class IdentifierExpression extends Expression {
         if (name == null) {
             throw new IllegalArgumentException("Identifier name cannot be null");
         }
-        for (int i = 0; i < RESERVED_KEYWORDS.length; i++) {
-            if (name.equals(RESERVED_KEYWORDS[i])) {
+        for (String reservedKeyword : RESERVED_KEYWORDS) {
+            if (name.equals(reservedKeyword)) {
                 throw new IllegalArgumentException("Identifier \"" + name + "\" is a reserved keyword.");
             }
         }
@@ -63,9 +63,8 @@ public class IdentifierExpression extends Expression {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!(obj instanceof IdentifierExpression))
+        if (!(obj instanceof IdentifierExpression other))
             return false;
-        IdentifierExpression other = (IdentifierExpression) obj;
         return Objects.equals(name, other.name);
     }
 

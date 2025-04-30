@@ -21,7 +21,7 @@ public class ConditionalExpression extends Expression {
      */
     public ConditionalExpression() {
         super(ExpressionType.COND);
-        setClauses(new ArrayList<ClauseExpression>());
+        setClauses(new ArrayList<>());
     }
 
     /**
@@ -63,22 +63,20 @@ public class ConditionalExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
     @Override
     public String toString() {
-        String string = "{\"" + COND_KEYWORD + "\":[";
+        StringBuilder string = new StringBuilder("{\"" + COND_KEYWORD + "\":[");
         for (int i = 0; i < clauses.size(); i++) {
-            string += clauses.get(i).toString();
+            string.append(clauses.get(i).toString());
             if (i < clauses.size() - 1) {
-                string += ",";
+                string.append(",");
             }
         }
-        string += "]}";
-        return string;
+        string.append("]}");
+        return string.toString();
     }
 
 }

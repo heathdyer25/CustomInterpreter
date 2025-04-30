@@ -25,8 +25,7 @@ public class IntegerExpression extends Expression {
 
     /**
      * Sets the value of the integer
-     *
-     * @param value
+     * @param value Value of integer to set
      */
     public void setValue(long value) {
         this.value = value;
@@ -34,7 +33,6 @@ public class IntegerExpression extends Expression {
 
     /**
      * Returns value of integer
-     *
      * @return Returns value of integer
      */
     public long getValue() {
@@ -45,9 +43,8 @@ public class IntegerExpression extends Expression {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!(obj instanceof IntegerExpression))
+        if (!(obj instanceof IntegerExpression other))
             return false;
-        IntegerExpression other = (IntegerExpression) obj;
         return value == other.value;
     }
 

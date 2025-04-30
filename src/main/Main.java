@@ -79,11 +79,13 @@ public class Main {
 
     /**
      * Initializes instances of lexer, parser, and interpreter.
+     * @param tracing Tracing enabled?
+     * @param lexical Lexical scoping enabled?
      */
-    public static void init() {
+    public static void init(boolean tracing, boolean lexical) {
         lexer = new Lexer();
         parser = new Parser();
-        interpreter = new Interpreter();
+        interpreter = new Interpreter(tracing, lexical);
     }
 
     /**
@@ -101,40 +103,33 @@ public class Main {
     /**
      * Main function of Interpreter application
      *
-     * @param args
-     * @throws IOException
+     * @param args Arguments of main from terminal
      */
     public static void main(String[] args) {
         boolean tracing = false;
         boolean lexicalScope = true;
         boolean print = true;
         //Check for any program arguments
-        for (int i = 0; i < args.length; i++) {
+        for (String arg : args) {
             //help argument
-            if (args[i].equals(ARG_HELP)) {
-                System.out.println(HELP_MSG);
-                System.exit(0);
-            }
-            //version argument
-            else if (args[i].equals(ARG_VERSION)) {
-                System.out.println(VERSION_MSG);
-                System.exit(0);
-            }
-            //tracing argument
-            else if (args[i].equals(ARG_TRACING)) {
-                tracing = true;
-            }
-            //dynamic scoping argument
-            else if (args[i].equals(ARG_DYNAMIC)) {
-                lexicalScope = false;
-            }
-            //no print argument
-            else if (args[i].equals(ARG_NO_PRINT)) {
-                print = false;
-            }
-            //otherwise invalid argument
-            else {
-                fail("Invalid argument \"" + args[i] + "\"\n" + HELP_MSG);
+            switch (arg) {
+                case ARG_HELP -> {
+                    System.out.println(HELP_MSG);
+                    System.exit(0);
+                }
+                //version argument
+                case ARG_VERSION -> {
+                    System.out.println(VERSION_MSG);
+                    System.exit(0);
+                }
+                //tracing argument
+                case ARG_TRACING -> tracing = true;
+                //dynamic scoping argument
+                case ARG_DYNAMIC -> lexicalScope = false;
+                //no print argument
+                case ARG_NO_PRINT -> print = false;
+                //otherwise invalid argument
+                default -> fail("Invalid argument \"" + arg + "\"\n" + HELP_MSG);
             }
         }
 
@@ -152,6 +147,7 @@ public class Main {
         // Try to interpret;
         Expression eval = null;
         try {
+            init(tracing, lexicalScope);
             eval = interpret(input);
         } catch (StackOverflowError e) {
             fail("Stack over flow error. Is there infinite recursion in your program?");
@@ -162,7 +158,7 @@ public class Main {
         if (eval != null) {
             //if we are printing final expression to terminal
             if (print) {
-                System.out.println(eval.toString());
+                System.out.println(eval);
             }
         } else {
             fail("Something went wrong... expression evaluated as null.");

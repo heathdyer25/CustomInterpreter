@@ -37,11 +37,11 @@ public class AssignmentExpression extends Expression {
 
     /**
      * Sets assignment expression's identifier expression
-     * @param identifier Sets identfiier expression
+     * @param identifier Sets identifier expression
      */
     public void setIdentifier(IdentifierExpression identifier) {
         if (identifier == null) {
-            throw new IllegalArgumentException("Assignemnt identifier cannot be null.");
+            throw new IllegalArgumentException("Assignment identifier cannot be null.");
         }
         this.identifier = identifier;
     }
@@ -78,9 +78,7 @@ public class AssignmentExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
 

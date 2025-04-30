@@ -21,7 +21,7 @@ public abstract class ListProcedures {
      */
     public static Expression cons(List<Expression> arguments) {
         //if no arguments, get empty list
-        if (arguments.size() == 0) {
+        if (arguments.isEmpty()) {
             return new ListExpression();
         }
         // Check for exactly two arguments
@@ -79,7 +79,7 @@ public abstract class ListProcedures {
      * Checks for empty list
      *
      * @param arguments List of expression
-     * @return Returns true if list is emtpy, false if not
+     * @return Returns BooleanExpression with value true if the list is empty and value false if not
      */
     public static Expression isEmpty(List<Expression> arguments) {
         // Check for exactly one argument
@@ -94,9 +94,8 @@ public abstract class ListProcedures {
 
     /**
      * Reverses order of list and returns new list
-     *
      * @param arguments List of expressions (1 list)
-     * @return
+     * @return Returns list of expressions with reverse order
      */
     public static Expression reverse(List<Expression> arguments) {
         // Check for exactly one argument

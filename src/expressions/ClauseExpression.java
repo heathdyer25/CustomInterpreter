@@ -33,7 +33,7 @@ public class ClauseExpression extends Expression {
     /**
      * Sets clause evaluation expression
      *
-     * @param evalExp Evalutation expression to set
+     * @param test Test of clause expression to set
      */
     public void setTest(Expression test) {
         if (test == null) {
@@ -54,7 +54,7 @@ public class ClauseExpression extends Expression {
     /**
      * Return expression of clause to set
      *
-     * @param returnExp Reutrns clause return expression
+     * @param consequent Consequence of condition clause to set
      */
     public void setConsequent(Expression consequent) {
         if (consequent == null) {
@@ -84,9 +84,7 @@ public class ClauseExpression extends Expression {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        return false;
+        return this == obj;
     }
 
 

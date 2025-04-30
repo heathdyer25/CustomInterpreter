@@ -16,7 +16,6 @@ import java.util.List;
 
 /**
  * @author Heath Dyer
- *
  * Built in IO procedures for the interpreter. Each procedure must take List<Expressions>
  * as its parameter and return an Expression as its result.
  */
@@ -33,10 +32,10 @@ public abstract class IOProcedures {
             if (arg.getType() == ExpressionType.STRING) {
                 print.append(((StringExpression) arg).getValue());
             } else {
-                print.append(arg.toString());
+                print.append(arg);
             }
         }
-        System.out.println(print.toString());
+        System.out.println(print);
         return new StringExpression(print.toString());
     }
 
@@ -47,7 +46,7 @@ public abstract class IOProcedures {
      */
     public static Expression fail(List<Expression> arguments) {
         // Check for no arguments
-        if (arguments.size() == 0) {
+        if (arguments.isEmpty()) {
             System.exit(1);
         }
         StringBuilder message = new StringBuilder();
@@ -56,10 +55,10 @@ public abstract class IOProcedures {
             if (exp.getType() == ExpressionType.STRING) {
                 message.append(((StringExpression) exp).getValue());
             } else {
-                message.append(exp.toString());
+                message.append(exp);
             }
         }
-        System.err.println(message.toString());
+        System.err.println(message);
         System.exit(1);
         return new DummyExpression();
     }
@@ -71,28 +70,26 @@ public abstract class IOProcedures {
      */
     public static Expression readInput(List<Expression> arguments) {
         // Check for no arguments
-        if (arguments.size() != 0) {
+        if (!arguments.isEmpty()) {
             throw new IllegalArgumentException("Procedure input does not take any arguments.");
         }
         //Get all input from standard in
-        BufferedReader inputReader = null;
-        String input = "";
+        BufferedReader inputReader;
+        StringBuilder input = new StringBuilder();
         try {
             inputReader = new BufferedReader(new InputStreamReader(System.in));
             String line;
             while ((line = inputReader.readLine()) != null) {
-                input += line;
+                input.append(line);
             }
-            if (inputReader != null) {
-                inputReader.close();
-            }
+            inputReader.close();
         }
         //Catch IO errors
         catch (IOException e) {
             throw new RuntimeException("Error occured while reading input from terminal.");
         }
         //return as expression
-        return new StringExpression(input);
+        return new StringExpression(input.toString());
     }
 
     /**
@@ -102,12 +99,12 @@ public abstract class IOProcedures {
      */
     public static Expression readLine(List<Expression> arguments) {
         // Check for no arguments
-        if (arguments.size() != 0) {
+        if (!arguments.isEmpty()) {
             throw new IllegalArgumentException("Procedure readLine does not take any arguments.");
         }
         // Get a single line of input from standard in
         BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
-        String input = "";
+        String input;
         try {
             input = inputReader.readLine();
         }

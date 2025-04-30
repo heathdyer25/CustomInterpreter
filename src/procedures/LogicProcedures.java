@@ -20,7 +20,7 @@ public abstract class LogicProcedures {
      * Checks equality of two expressions.
      *
      * @param arguments Takes List<Expressions> as arguments
-     * @return Returns Returns BooleanExpression true if equal, false if not
+     * @return Returns BooleanExpression with values true if equal or false if not
      * @throws IllegalArgumentException Equals/ eq() must have exactly 2 arguments
      */
     public static Expression eq(List<Expression> arguments) {
@@ -81,7 +81,7 @@ public abstract class LogicProcedures {
      * Checks if an expression is equal to zero. Returns true if zero, otherwise false
      *
      * @param arguments Takes list of expressions as arguments
-     * @return Returns BooleanExpression true if zero, false if not
+     * @return Returns BooleanExpression with values true if zero and false if not
      * @throws IllegalArgumentException zero?() must take exactly one expression
      */
     public static Expression isZero(List<Expression> arguments) {
@@ -109,13 +109,13 @@ public abstract class LogicProcedures {
             throw new IllegalArgumentException("Procedure or? must have at least 2 arguments.");
         }
         // iterate through all arguments and check for one of them true
-        for (int i = 0; i < arguments.size(); i++) {
+        for (Expression argument : arguments) {
             //check if argument is boolean type
-            if (arguments.get(i).getType() != ExpressionType.BOOLEAN) {
+            if (argument.getType() != ExpressionType.BOOLEAN) {
                 throw new IllegalArgumentException("Procedure or? arguments must evalaute as boolean type.");
             }
             //check if true
-            if (((BooleanExpression) arguments.get(i)).getValue() == true) {
+            if (((BooleanExpression) argument).getValue()) {
                 return new BooleanExpression(true);
             }
         }
@@ -134,13 +134,13 @@ public abstract class LogicProcedures {
             throw new IllegalArgumentException("Procedure and? must have at least 2 arguments.");
         }
         // iterate through all arguments and check for one of them true
-        for (int i = 0; i < arguments.size(); i++) {
+        for (Expression argument : arguments) {
             //check if argument is boolean type
-            if (arguments.get(i).getType() != ExpressionType.BOOLEAN) {
+            if (argument.getType() != ExpressionType.BOOLEAN) {
                 throw new IllegalArgumentException("Procedure and? arguments must evalaute as boolean type.");
             }
             //check if true
-            if (((BooleanExpression) arguments.get(i)).getValue() == false) {
+            if (!((BooleanExpression) argument).getValue()) {
                 return new BooleanExpression(false);
             }
         }
@@ -151,7 +151,7 @@ public abstract class LogicProcedures {
      * Checks if an expression is equal to zero. Returns true if zero, otherwise false
      *
      * @param arguments Takes list of expressions as arguments
-     * @return Returns BooleanExpression true if zero, false if not
+     * @return Returns BooleanExpression with values true if zero or false if not
      * @throws IllegalArgumentException zero?() must take exactly one expression
      */
     public static Expression not(List<Expression> arguments) {

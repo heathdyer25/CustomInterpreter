@@ -25,8 +25,7 @@ public class StringExpression extends Expression {
 
     /**
      * Sets value of string
-     *
-     * @param value
+     * @param value String value to set for expression
      * @throws IllegalArgumentException if given string value is null
      */
     public void setValue(String value) {
@@ -38,7 +37,6 @@ public class StringExpression extends Expression {
 
     /**
      * Returns string
-     *
      * @return Returns string
      */
     public String getValue() {
@@ -59,9 +57,8 @@ public class StringExpression extends Expression {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (!(obj instanceof StringExpression))
+        if (!(obj instanceof StringExpression other))
             return false;
-        StringExpression other = (StringExpression) obj;
         return Objects.equals(value, other.value);
     }
 
