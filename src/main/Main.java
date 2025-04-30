@@ -3,9 +3,11 @@ package main;
 import expressions.Expression;
 import interpreter.Interpreter;
 import lexer.Lexer;
+import lexer.Token;
 import parser.Parser;
 
 import java.io.IOException;
+import java.util.List;
 
 import static main.Util.fail;
 import static main.Util.getInput;
@@ -40,7 +42,7 @@ public class Main {
     /**
      * Help message for program usage
      */
-    private static final String HELP_MSG =
+    public static final String HELP_MSG =
             """
                     Usage: ./run.sh <options>
                     
@@ -62,7 +64,7 @@ public class Main {
     /**
      * Version message
      */
-    private static final String VERSION_MSG = "Version 1.6.0";
+    public static final String VERSION_MSG = "Version 1.7.0";
 
     /**
      * Lexer instance
@@ -97,7 +99,10 @@ public class Main {
      * @return Evaluated expression
      */
     public static Expression interpret(String input) {
-        return interpreter.evaluate(desugar(parser.parse(lexer.lex(input))), interpreter.getInitialEnv());
+        List<Token> tokens = lexer.lex(input);
+        Expression exp = parser.parse(tokens);
+        desugar(exp);
+        return interpreter.evaluate(exp, interpreter.getInitialEnv());
     }
 
     /**

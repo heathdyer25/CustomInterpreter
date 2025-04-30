@@ -41,21 +41,21 @@ public abstract class Util {
      * @throws IOException Failure while reading standard input
      */
     public static String getInput() throws IOException {
-        //Get all input from standard in
+        // Get all input from standard in
         BufferedReader inputReader = null;
         StringBuilder input = new StringBuilder();
         try {
             inputReader = new BufferedReader(new InputStreamReader(System.in));
             String line;
             while ((line = inputReader.readLine()) != null) {
-                input.append(line);
+                input.append(line).append("\n");  // Add newline after each line
             }
         }
-        //Catch IO errors
+        // Catch IO errors
         catch (IOException e) {
             throw new IOException(e.getMessage());
         }
-        //Close input stream if not closed
+        // Close input stream if not closed
         finally {
             if (inputReader != null) {
                 inputReader.close();

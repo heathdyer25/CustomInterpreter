@@ -3,6 +3,8 @@ package main;
 import expressions.Expression;
 import interpreter.Interpreter;
 import lexer.Lexer;
+import org.commonmark.node.Node;
+import org.commonmark.renderer.html.HtmlRenderer;
 import parser.Parser;
 
 import javax.swing.*;
@@ -14,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static main.Main.VERSION_MSG;
 import static parser.Desugar.desugar;
 
 /**
@@ -40,7 +43,7 @@ public class GUI extends JFrame {
     /**
      * Application name
      */
-    public static final String APPLICATION_NAME = "CSC417 Language IDE v0.1";
+    public static final String APPLICATION_NAME = "417 Language IDE " + VERSION_MSG;
     /**
      * Option for enabling lexical scoping
      */
@@ -71,10 +74,36 @@ public class GUI extends JFrame {
         // Create menu bar
         createMenuBar();
 
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                new JScrollPane(codeArea),
-                new JScrollPane(outputArea));
-        splitPane.setResizeWeight(0.5);
+        // Create scroll pane for code area with line numbers
+        JScrollPane codeScrollPane = new JScrollPane(codeArea);
+        JTextArea lineNumbers = new JTextArea("1");
+        lineNumbers.setBackground(new Color(30, 30, 30));
+        lineNumbers.setForeground(Color.GRAY);
+        lineNumbers.setEditable(false);
+        lineNumbers.setFont(codeArea.getFont());
+        codeScrollPane.setRowHeaderView(lineNumbers);
+
+        // Update line numbers dynamically
+        codeArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            private void updateLineNumbers() {
+                int totalLines = codeArea.getText().split("\n", -1).length;
+                StringBuilder builder = new StringBuilder();
+                for (int i = 1; i <= totalLines; i++) {
+                    builder.append(i).append("\n");
+                }
+                lineNumbers.setText(builder.toString());
+            }
+
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e) { updateLineNumbers(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e) { updateLineNumbers(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { updateLineNumbers(); }
+        });
+
+        // Create output scroll pane
+        JScrollPane outputScrollPane = new JScrollPane(outputArea);
+
+        // Reconstruct split pane
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, codeScrollPane, outputScrollPane);
 
         // Set up the run button
         JButton runButton = new JButton("Run");
@@ -98,6 +127,11 @@ public class GUI extends JFrame {
 
         // Add action listener for the run button
         runButton.addActionListener(e -> executeCode());
+
+        // Mono font
+        Font monoFont = new Font("Monospaced", Font.PLAIN, 12);
+        codeArea.setFont(monoFont);
+        lineNumbers.setFont(monoFont);
 
     }
 
@@ -134,8 +168,8 @@ public class GUI extends JFrame {
         fileMenu.add(newItem);
         fileMenu.add(openItem);
         fileMenu.add(saveItem);
-        // Options menu
 
+        // Options menu
         JMenu optionsMenu = new JMenu("Options");
         lexicalOption = new JCheckBoxMenuItem("Enable Lexical Scoping");
         lexicalOption.setSelected(true);
@@ -143,9 +177,14 @@ public class GUI extends JFrame {
         optionsMenu.add(lexicalOption);
         optionsMenu.add(tracingOption);
 
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem aboutItem = new JMenuItem("About");
+        helpMenu.add(aboutItem);
+
         //Set menu bar
         menuBar.add(fileMenu);
         menuBar.add(optionsMenu);
+        menuBar.add(helpMenu);
         setJMenuBar(menuBar);
 
 
@@ -153,6 +192,7 @@ public class GUI extends JFrame {
         newItem.addActionListener(e -> newFile());
         openItem.addActionListener(e -> openFile());
         saveItem.addActionListener(e -> saveFile());
+        aboutItem.addActionListener(e -> showReadme());
 
     }
 
@@ -213,6 +253,36 @@ public class GUI extends JFrame {
             outputArea.setText(e.getMessage());
             outputArea.setForeground(Color.RED);
         }
+    }
+
+    private void showReadme() {
+        JFrame readmeFrame = new JFrame("README");
+        readmeFrame.setSize(600, 400);
+        readmeFrame.setLocationRelativeTo(this);
+
+        JEditorPane readmePane = new JEditorPane();
+        readmePane.setContentType("text/html");
+        readmePane.setEditable(false);
+
+        try {
+            File readmeFile = new File("README.md"); // Make sure this file exists in your working directory
+            String content = new String(Files.readAllBytes(readmeFile.toPath()));
+
+
+            // Convert Markdown to HTML
+            org.commonmark.parser.Parser mdParser = org.commonmark.parser.Parser.builder().build();
+            Node document = mdParser.parse(content);
+            HtmlRenderer renderer = HtmlRenderer.builder().build();
+            String html = renderer.render(document);
+
+            readmePane.setText("<html><body style='font-family:sans-serif;'>" + html + "</body></html>");
+
+        } catch (IOException e) {
+            readmePane.setText("<html><body><p style='color:red;'>Error loading README: " + e.getMessage() + "</p></body></html>");
+        }
+
+        readmeFrame.add(new JScrollPane(readmePane));
+        readmeFrame.setVisible(true);
     }
 
     /**

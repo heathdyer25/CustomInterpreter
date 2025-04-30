@@ -119,7 +119,7 @@ public class Parser {
     private Expression parseExpression() {
         Token token = peekToken();
         if (token == null) {
-            throw new RuntimeException("Bad input. Not tokens to parse");
+            throw new RuntimeException("Bad input. No tokens to parse.");
         }
         Expression exp = switch (token.getType()) {
             // Start of parameters
@@ -230,8 +230,17 @@ public class Parser {
         match(TokenType.LAMBDA, TokenType.LAMBDA_ALT);
         // Check for Open paren
         match(TokenType.OPENPAREN);
+        // if close paren
+        Token token = peekToken();
+        ParametersExpression params;
         // Check for param list
-        ParametersExpression params = parseParameters();
+        if (token != null && token.getType() != TokenType.CLOSEPAREN) {
+            params = parseParameters();
+        }
+        // otherwise empty
+        else {
+            params = new ParametersExpression();
+        }
         // Check for close paren
         match(TokenType.CLOSEPAREN);
         // Now read the block that follows
