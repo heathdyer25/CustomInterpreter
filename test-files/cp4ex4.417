@@ -1,0 +1,1 @@
+{add(3,2); 2; cond (false => 1) (true => mul(2, 2))}

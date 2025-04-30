@@ -1,0 +1,13 @@
+{
+    let getLetterGrade = λ(score)
+    {
+        cond
+            (greaterThan?(score, 89) => "A")
+            (greaterThan?(score, 79) => "B")
+            (greaterThan?(score, 69) => "C")
+            (greaterThan?(score, 59) => "D")
+            (true => "F")
+    };
+    let grade = 67;
+    getLetterGrade(grade)
+}

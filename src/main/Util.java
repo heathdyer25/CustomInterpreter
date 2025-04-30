@@ -7,41 +7,47 @@ import java.io.InputStreamReader;
 
 /**
  * Utilities for our application.
+ *
  * @author Heath Dyer
  */
 public abstract class Util {
-    /** Max character length of identifiers in our language */
+    /**
+     * Max character length of identifiers in our language
+     */
     public static final int MAX_IDLEN = 60;
-    /** Max character length of */
+    /**
+     * Max character length of
+     */
     public static final int MAX_INTLEN = 20;
-    /** Max character length of strings in our language */
+    /**
+     * Max character length of strings in our language
+     */
     public static final int MAX_STRLEN = 1000;
 
     /**
      * Prints message to standard error and returns program with failing status.
+     *
      * @param msg Message to print to standard error
      */
-    public static void fail(String msg)
-    {
+    public static void fail(String msg) {
         System.err.println(msg);
         System.exit(1);
     }
 
     /**
      * Reads all input in standard input and returns the string
+     *
      * @return Returns string of all input from standard in
      * @throws IOException Failure while reading standard input
      */
-    public static String getInput() throws IOException
-    {
+    public static String getInput() throws IOException {
         //Get all input from standard in
         BufferedReader inputReader = null;
         String input = "";
         try {
             inputReader = new BufferedReader(new InputStreamReader(System.in));
             String line;
-            while ((line = inputReader.readLine()) != null)
-            {
+            while ((line = inputReader.readLine()) != null) {
                 input += line;
             }
         }
@@ -60,12 +66,12 @@ public abstract class Util {
 
     /**
      * Reads all input from a file
+     *
      * @param filename Filename to read from
      * @return Returns file contents as string
      * @throws IOException Throws exception if cannot read file
      */
-    public static String getInputFromFile(String filename) throws IOException
-    {
+    public static String getInputFromFile(String filename) throws IOException {
         FileReader reader = null;
         StringBuilder input = new StringBuilder();
         try {
@@ -74,11 +80,9 @@ public abstract class Util {
             while ((c = reader.read()) != -1) {
                 input.append((char) c);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new IOException(e.getMessage());
-        }
-        finally {
+        } finally {
             if (reader != null) {
                 reader.close();
             }

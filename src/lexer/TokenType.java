@@ -17,15 +17,21 @@ public enum TokenType {
     TOKEN_STRING,
     TOKEN_EOF,
     TOKEN_LAMBDA,
-    /** Keywords: (List must start with LAMBDA.) */
+    /**
+     * Keywords: (List must start with LAMBDA.)
+     */
     TOKEN_LAMBDA_ALT,
     TOKEN_DEFINITION,
     TOKEN_COND,
-    /** Important that arrow precedes equals (a prefix) */
+    /**
+     * Important that arrow precedes equals (a prefix)
+     */
     TOKEN_ARROW,
     TOKEN_EQUALS,
     TOKEN_LET,
-    /** Error types */
+    /**
+     * Error types
+     */
     TOKEN_PANIC,
     TOKEN_BAD_WS,
     TOKEN_BAD_COMMENT,

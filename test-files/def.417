@@ -1,0 +1,17 @@
+{
+    def even = lambda(n) {
+        cond
+            (zero?(n) => true)
+            (true => odd(sub(n, 1)))
+    };
+    def odd = lambda(n) {
+        cond
+            (zero?(n) => false)
+            (true => even(sub(n, 1)))
+    };
+    print("7 odd? ", odd(7));
+    print("8 odd? ", odd(8));
+    print("9 even? ", even(9));
+    print("10 even? ", even(10));
+    "done"
+}
