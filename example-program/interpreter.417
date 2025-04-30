@@ -1,0 +1,784 @@
+
+//---------------------------------------------------------------------------------------------------
+// Interpreter for Heath language
+// Author: Heath Dyer
+//---------------------------------------------------------------------------------------------------
+
+{
+    //token types
+    let TOKEN_IDENT = "IDENTIFIER";
+    let TOKEN_STR = "STRING";
+    let TOKEN_INT = "INTEGER";
+    let TOKEN_OPEN_PAREN = "OPEN_PAREN";
+    let TOKEN_CLOSE_PAREN = "CLOSE_PAREN";
+    let TOKEN_OPEN_BRACE = "OPEN_BRACE";
+    let TOKEN_CLOSE_BRACE = "CLOSE_BRACE";
+    let TOKEN_PERIOD = "PERIOD";
+    let TOKEN_COMMA = "COMMA";
+    let TOKEN_SEMICOLON = "SEMICOLON";
+    let TOKEN_COLON = "COLON";
+    let TOKEN_QUESTION_MARK = "QUESTION_MARK";
+    let TOKEN_EXCLAMATION_MARK = "EXCLAMATION_MARK";
+
+    //keywords
+    let KEYWORD_HEATH = "heath";
+    let KEYWORD_LET = "let";
+    let KEYWORD_BE = "be";
+    let KEYWORD_CHANGE = "change";
+    let KEYWORD_TO = "to";
+    let KEYWORD_DO = "do";
+    let KEYWORD_ON = "on";
+    let KEYWORD_AND = "and";
+    let KEYWORD_FUNC = "function";
+    let KEYWORD_THAT = "that";
+    let KEYWORD_IF = "if";
+    let KEYWORD_ELSE = "else";
+    let KEYWORD_THEN = "then";
+    let KEYWORD_PLEASE = "please";
+
+    //expression types
+    let EXP_PROGRAM = "PROGRAM";
+    let EXP = "EXPRESSION";
+    let EXP_INT = "INTEGER";
+    let EXP_STR = "STRING";
+    let EXP_PROCEDURE = "PROCEDURE"; //used in interpreter but not grammar
+    let EXP_BOOL = "BOOLEAN";
+    let EXP_IDENT = "IDENTIFIER";
+    let EXP_LET = "LET";
+    let EXP_ASSIGN = "ASSIGN";
+    let EXP_APP = "APPLICATION";
+    let EXP_ARGLIST = "ARGLIST";
+    let EXP_FUNC = "FUNCTION";
+    let EXP_PARAMLIST = "PARAMLIST";
+    let EXP_BLOCK = "BLOCK";
+    let EXP_COND = "CONDITIONAL";
+    let EXP_CLAUSE = "CLAUSE";
+
+//---------------------------------------------------------------------------------------------------
+// Tokenizer
+//---------------------------------------------------------------------------------------------------
+
+    //turn string input into tokens
+    let tokenize = lambda(input) {
+
+        //keep track of input pos
+        let pos = 0;
+
+        //peeks next character without changing position
+        let peekChar = lambda() {
+            cond
+                (or?(greaterThan?(pos, length(input)), equals?(pos, length(input))) => "")
+                (true => substring(input, pos, add(pos, 1)))
+        };
+
+        //gets next char and changes position
+        let readChar = lambda() {
+            let char = peekChar();
+            pos = add(pos, 1);
+            char
+        };
+
+        //reads identifier and returns token
+        let readIdentifier = lambda() {
+            let readIdentifierRecursively = lambda(result) {
+                let char = peekChar();
+                cond
+                    (isLetter?(char) => {
+                        readChar();
+                        readIdentifierRecursively(concat(result, char))
+                    })
+                    (true => result)
+            };
+            let result = readIdentifierRecursively("");
+            let token = cons();
+            token = cons(result, token);
+            cond
+                // if keyword, just return keyword
+                (or?(equals?(result, KEYWORD_LET), equals?(result, KEYWORD_BE), equals?(result, KEYWORD_CHANGE),
+                    equals?(result, KEYWORD_TO), equals?(result, KEYWORD_DO), equals?(result, KEYWORD_ON),
+                    equals?(result, KEYWORD_AND), equals?(result, KEYWORD_FUNC), equals?(result, KEYWORD_THAT),
+                    equals?(result, KEYWORD_IF), equals?(result, KEYWORD_ELSE), equals?(result, KEYWORD_THEN),
+                    equals?(result, KEYWORD_HEATH), equals?(result, KEYWORD_PLEASE)) => token)
+                // else tag as identifier
+                (true => cons(TOKEN_IDENT, token))
+        };
+
+        //reads string and returns token
+        let readString = lambda() {
+            let readStringRecursively = lambda(result) {
+                let char = peekChar();
+                cond
+                    (equals?(char, "\"") => {
+                        readChar();
+                        result
+                    })
+                    (true => {
+                        readChar();
+                        readStringRecursively(concat(result, char))
+                    })
+            };
+            let token = cons();
+            token = cons(readStringRecursively(""), token);
+            cons(TOKEN_STR, token)
+        };
+
+        //reads number and returns token
+        let readNumber = lambda() {
+            let readNumberRecursively = lambda(result) {
+                let char = peekChar();
+                cond
+                    (isDigit?(char) => {
+                        readChar();
+                        readNumberRecursively(concat(result, char))
+                    })
+                    (true => result)
+            };
+            let token = cons();
+            token = cons(parseInt(readNumberRecursively("")), token);
+            cons(TOKEN_INT, token)
+        };
+
+        //reads comment
+        let readComment = lambda() {
+            let readCommentRecursively = lambda() {
+                let char = peekChar();
+                cond
+                    (equals?("\n", char) => true)
+                    (true => {
+                        readChar();
+                        readCommentRecursively()
+                    })
+            };
+            readCommentRecursively()
+        };
+
+        //recursive tokenize function
+        let tokenizeRecursively = lambda(tokens) {
+            let char = peekChar();
+            let token = cons();
+            cond
+                //end of input? return
+                (equals?(char, "") => {
+                    tokens
+                })
+                //white space? skip
+                (or?(equals?(char, " "), equals?(char, "\n"), equals?(char, "\t")) => { 
+                    readChar();
+                    tokenizeRecursively(tokens)
+                })
+                //comment? skip
+                (equals?(char, "#") => {
+                    readComment();
+                    tokenizeRecursively(tokens)
+                })
+                //token open paren
+                (equals?(char, "(") => { 
+                    readChar();
+                    token = cons(TOKEN_OPEN_PAREN, token);
+                    tokenizeRecursively(cons(token, tokens))
+                })
+                //token close paren
+                (equals?(char, ")") => {
+                    readChar();
+                    token = cons(TOKEN_CLOSE_PAREN, token);
+                    tokenizeRecursively(cons(token, tokens))  
+                })
+                //token comma
+                (equals?(char, ",") => {
+                    readChar();
+                    token = cons(TOKEN_COMMA, token);
+                    tokenizeRecursively(cons(token, tokens))  
+                })
+                //token period
+                (equals?(char, ".") => {
+                    readChar();
+                    token = cons(TOKEN_PERIOD, token);
+                    tokenizeRecursively(cons(token, tokens))  
+                })
+                (equals?(char, "!") => {
+                    readChar();
+                    token = cons(TOKEN_EXCLAMATION_MARK, token);
+                    tokenizeRecursively(cons(token, tokens))  
+                })
+                (equals?(char, "?") => {
+                    readChar();
+                    token = cons(TOKEN_QUESTION_MARK, token);
+                    tokenizeRecursively(cons(token, tokens))  
+                })
+                (equals?(char, ":") => { 
+                    readChar();
+                    token = cons(TOKEN_COLON, token);
+                    tokenizeRecursively(cons(token, tokens))
+                })
+                (equals?(char, ";") => { 
+                    readChar();
+                    token = cons(TOKEN_SEMICOLON, token);
+                    tokenizeRecursively(cons(token, tokens))
+                })
+                //token string
+                (equals?(char, "\"") => {
+                    readChar();
+                    tokenizeRecursively(cons(readString(), tokens))  
+                })
+                //token number
+                (isDigit?(char) => {
+                    tokenizeRecursively(cons(readNumber(), tokens))
+                })
+                //token identifier or keyword
+                (isLetter?(char) => {
+                    tokenizeRecursively(cons(readIdentifier(), tokens))
+                })
+                //unknown token
+                (true => fail("Unknown token encountered: ", readChar()))
+        };
+        reverse(tokenizeRecursively(cons()))  // Start recursive tokenization
+    };
+
+//---------------------------------------------------------------------------------------------------
+// Parser
+//---------------------------------------------------------------------------------------------------
+
+    //turn list of tokens into AST
+    let parse = lambda(tokens) {
+        //peek next token
+        let peekToken = lambda() {
+            cond
+                (isEmpty?(tokens) => false)
+                (true => head(tokens))
+        };
+
+        //read the next token
+        let readToken = lambda() {
+            let token = peekToken();
+            tokens = tail(tokens);
+            token
+        };
+
+        //match the next token to expected
+        let matchToken = lambda(expected, expressionType) {
+            let token = peekToken();
+            cond
+                (equals?(token, false) =>  {
+                    fail("Error: expected ", expected, " for ", expressionType, " but there were no more tokens.")
+                })
+                (equals?(head(token), expected) => readToken())
+                (true => {
+                    fail("Error: expected ", expected, " for ", expressionType, " but found ", head(token))
+                })
+        };
+
+        // <PROGRAM> = <EXPRESSION0> <PROGRAM> | epsilon
+        def parseProgram = lambda() {
+            let ast = cons();
+            def parseProgramRecursively = lambda() {
+                let token = peekToken();
+                cond
+                    (equals?(token, false) => {
+                        ast = cons(EXP_PROGRAM, reverse(ast))
+                    })
+                    (true => {
+                        ast = cons(parseExpression0(), ast);
+                        parseProgramRecursively()
+                    })
+            };
+            parseProgramRecursively()
+        };
+
+        // <EXPRESSION0> = <EXPRESSION1> .
+        def parseExpression0 = lambda() {
+            let expression = parseExpression1();
+            matchToken(TOKEN_PERIOD, EXP);
+            expression
+        };
+
+        // <EXPRESSION1> = <INTEGER> | <STRING> | <IDENTIFIER> | <LET> | <ASSIGNMENT> | <APPLICATION>
+        def parseExpression1 = lambda() {
+            let token = peekToken();
+            cond
+                (equals?(head(token), TOKEN_INT) => readToken())
+                (equals?(head(token), TOKEN_STR) => readToken())
+                (equals?(head(token), TOKEN_IDENT) => readToken())
+                (equals?(head(token), KEYWORD_LET) => parseLet())
+                (equals?(head(token), KEYWORD_CHANGE) => parseAssignment())
+                (equals?(head(token), KEYWORD_DO) => parseApplication())
+                (equals?(head(token), KEYWORD_FUNC) => parseFunction())
+                (equals?(head(token), KEYWORD_IF) => parseConditional())
+                (true => {
+                    fail("Error: Unexpected token in expression ", token)
+                })
+        };
+
+        // <LET> = let <IDENTIFIER> be <EXPRESSION1>
+        def parseLet = lambda() {
+            matchToken(KEYWORD_LET, EXP_LET);
+            let identifier = matchToken(TOKEN_IDENT, EXP_LET);
+            matchToken(KEYWORD_BE, EXP_LET);
+            let expression = parseExpression1();
+            cons(EXP_LET, cons(identifier, cons(expression, cons())))
+        };
+
+        // <ASSIGNMENT> = change <IDENTIFIER> to <EXPRESSION1> 
+        def parseAssignment = lambda() {
+            matchToken(KEYWORD_CHANGE, EXP_ASSIGN);
+            let identifier = matchToken(TOKEN_IDENT, EXP_ASSIGN);
+            matchToken(KEYWORD_TO, EXP_ASSIGN);
+            let expression = parseExpression1();
+            cons(EXP_ASSIGN, cons(identifier, cons(expression, cons())))
+        };
+
+        // <APPLICATION> = do <IDENTIFIER> please | do <IDENTIFIER> on <ARGLIST> please
+        def parseApplication = lambda() {
+            matchToken(KEYWORD_DO, EXP_APP);
+            let identifier = matchToken(TOKEN_IDENT, EXP_APP);
+            let token = peekToken();
+            cond
+                (equals?(head(token), KEYWORD_ON) => {
+                    matchToken(KEYWORD_ON, EXP_APP);
+                    let arguments = parseArguments();
+                    matchToken(KEYWORD_PLEASE, EXP_APP);
+                    cons(EXP_APP, cons(identifier, cons(arguments, cons())))
+                })
+                (true => {
+                    let arguments = cons(EXP_ARGLIST, cons());
+                    matchToken(KEYWORD_PLEASE, EXP_APP);
+                    cons(EXP_APP, cons(identifier, cons(arguments, cons())))
+                })
+        };
+
+        // <ARGLIST> = <EXPRESSION1> | <EXPRESSION1> and <ARGLIST>
+        def parseArguments = lambda() {
+            let parseArgumentsRecursively = lambda() {
+                let arg = parseExpression1();
+                let token = peekToken();
+                cond
+                    (equals?(head(token), KEYWORD_AND) => {
+                        matchToken(KEYWORD_AND, EXP_ARGLIST);
+                        cons(arg, parseArgumentsRecursively())
+                    })
+                    (true => cons(arg, cons()))
+            };
+            cons(EXP_ARGLIST, parseArgumentsRecursively())
+        };
+
+        // <FUNCTION> = function that <BLOCK> | function on <PARAMLIST> that <BLOCK>
+        def parseFunction = lambda() {
+            matchToken(KEYWORD_FUNC, EXP_FUNC);
+            let token = peekToken();
+            cond
+                // Function with params
+                (equals?(head(token), KEYWORD_ON) => {
+                    matchToken(KEYWORD_ON, EXP_FUNC);
+                    let params = parseParamlist();
+                    matchToken(KEYWORD_THAT, EXP_FUNC);
+                    let block = parseBlock();
+                    cons(EXP_FUNC, cons(params, cons(block, cons())))
+                })
+                // Function without params
+                (equals?(head(token), KEYWORD_THAT) => {
+                    matchToken(KEYWORD_THAT, EXP_FUNC);
+                    let block = parseBlock();
+                    cons(EXP_FUNC, cons(cons(EXP_PARAMLIST, cons()), cons(block, cons())))
+                })
+                (true => {
+                    fail("Error: Unexpected token in function ", token)
+                })
+        };
+
+        // <PARAMLIST> = <IDENTIFIER> | <IDENTIFIER> and <PARAMLIST>
+        def parseParamlist = lambda() {
+            let parseParamlistRecursively = lambda() {
+                let param = matchToken(TOKEN_IDENT, EXP_PARAMLIST);
+                let token = peekToken();
+                cond
+                    (equals?(head(token), KEYWORD_AND) => {
+                        matchToken(KEYWORD_AND, EXP_PARAMLIST);
+                        cons(param, parseParamlistRecursively())
+                    })
+                    (true => cons(param, cons()))
+            };
+            cons(EXP_PARAMLIST, parseParamlistRecursively())
+        };
+
+        // <BLOCK> = <EXPRESSION1> , <BLOCK>  | <EXPRESSION1>
+        def parseBlock = lambda() {
+            let block = cons();
+            let parseBlockRecursively = lambda(block) {
+                let expression = parseExpression1();
+                let token = peekToken();
+                cond
+                    (equals?(head(token), TOKEN_COMMA) => {
+                        matchToken(TOKEN_COMMA,  EXP_BLOCK);
+                        parseBlockRecursively(cons(expression, block))
+                    })
+                    (true => cons(EXP_BLOCK, reverse(cons(expression, block))))
+            };
+            parseBlockRecursively(cons())
+        };
+
+        // <COND> = <CLAUSE> | <CLAUSE> ; else <CLAUSE>
+        def parseConditional = lambda() {
+            let clause = parseClause();
+            let token = peekToken();
+            cond
+                (equals?(head(token), TOKEN_SEMICOLON) => {
+                    matchToken(TOKEN_SEMICOLON, EXP_COND);
+                    matchToken(KEYWORD_ELSE, EXP_COND);
+                    let elseClause = parseClause();
+                    cons(EXP_COND, cons(clause, cons(elseClause, cons())))
+                })
+                (true => cons(EXP_COND, cons(clause, cons())))
+        };
+
+        // <CLAUSE>  = if <EXPRESSION1> then <BLOCK>
+        def parseClause = lambda()  {
+            matchToken(KEYWORD_IF, EXP_CLAUSE);
+            let condition = parseExpression1();
+            matchToken(TOKEN_QUESTION_MARK, EXP_CLAUSE);
+            let block = parseBlock();
+            cons(EXP_CLAUSE, cons(condition, cons(block, cons())))
+        };
+
+        //parse program
+        parseProgram()
+    };
+
+//---------------------------------------------------------------------------------------------------
+// Interpreter
+//---------------------------------------------------------------------------------------------------
+
+    //read and evaluate ast
+    let interpret = lambda(ast) {
+
+        //get current working env (dynamic scoping)
+        let currentEnv = cons(cons(), cons());
+
+        //create vector
+        let vector = lambda(key, value) {
+            cons(key, cons(value, cons()))
+        };
+
+        //bind new variable
+        let bind = lambda(key, value) {
+            currentEnv = cons(cons(vector(key, value), head(currentEnv)), tail(currentEnv))
+        };
+
+        //definte intital environment bindings
+        bind("true", vector(EXP_BOOL, true));
+        bind("false", vector(EXP_BOOL, false));
+        bind("add", vector(EXP_PROCEDURE, add));
+        bind("subtract", vector(EXP_PROCEDURE, sub));
+        bind("multiply", vector(EXP_PROCEDURE, mul));
+        bind("divide", vector(EXP_PROCEDURE, div));
+        bind("print", vector(EXP_PROCEDURE, print));
+        bind("equals", vector(EXP_PROCEDURE, equals?));
+
+        //extend env
+        let extend = lambda() {
+            currentEnv = cons(cons(), currentEnv)
+        };
+
+        let pop = lambda() {
+            currentEnv = tail(currentEnv)
+        };
+
+        //extends environment for function application
+        let extendParams = lambda(params, arglist) {
+            extend();
+            let extendRecursively = lambda(params, arglist) {
+                cond
+                    //base case
+                    (and?(isEmpty?(params), isEmpty?(arglist)) => currentEnv)
+                    //error, not the same number of params as args
+                    (or?(isEmpty?(params), isEmpty?(arglist)) => 
+                        fail("Number of arguments during function application did not match number of parameters."))
+                    //bind and continue
+                    (true => {
+                        bind(head(tail(head(params))), head(arglist));
+                        extendRecursively(tail(params), tail(arglist))
+                    })
+            };
+            extendRecursively(params, arglist)
+        };
+
+        // lookup value associated with a given key in the environment
+        let lookup = lambda(key) {
+            //look through env
+            let lookupInEnv = lambda(env) {
+                cond
+                    // identifier not found, false
+                    (isEmpty?(env) => false)
+                    // identifier found, get value
+                    (equals?(head(head(env)), key) => head(tail(head(env))))
+                    // no match, continue to the next binding
+                    (true => lookupInEnv(tail(env)))
+            };
+
+            //look through lsit of envs
+            let lookupInEnvs = lambda(envs) {
+                cond
+                    // no more envs, error
+                    (isEmpty?(envs) => {
+                        fail("Error: unbound identifier ", key)
+                    })
+                    // If the key is found in the current environment, return its value
+                    (not?(equals?(lookupInEnv(head(envs)), false)) => lookupInEnv(head(envs)))
+                    // Otherwise, continue to the next environment
+                    (true => lookupInEnvs(tail(envs)))
+            };
+
+            // Start the recursive function
+            lookupInEnvs(currentEnv)
+        };
+
+        // Rebinds the value of a key in the environments
+        let rebind = lambda(key, value) {
+            // Rebind within a single environment         
+            let rebindInEnv = lambda(env) {
+                let rebuildEnv = lambda(env, updated) {
+                    cond
+                        // If the environment is empty, the key is not found
+                        (isEmpty?(env) => false)
+                        // If the key matches, update its value
+                        (equals?(head(head(env)), key) =>
+                            cond
+                                (isEmpty?(updated) => cons(vector(key, value), tail(env)))
+                                (true => cons(reverse(updated), cons(vector(key, value), tail(env))))
+                        // Otherwise, keep rebuilding the environment
+                        (true => rebuildEnv(tail(env), cons(head(env), updated))))
+                };
+                rebuildEnv(env, cons()) // Start rebuilding with an empty list
+            };
+
+            // Rebind within the list of environments
+            let rebindInEnvs = lambda(envs) {
+                let newEnv = false;
+                let rebuildEnvs = lambda(envs, updated) {
+                    cond
+                        // If no environments are left, the key is unbound
+                        (isEmpty?(envs) => {
+                            fail("Error: unbound identifier ", key)
+                        })
+                        // If the key is found in the current environment, update it
+                        (not?(equals?(newEnv = rebindInEnv(head(envs)), false)) => {
+                            cond
+                                (isEmpty?(updated) => cons(newEnv, tail(envs)))
+                                (true => append(reverse(updated), cons(newEnv, tail(envs))))
+                        })
+                        // Otherwise, continue with the next environment
+                        (true => rebuildEnvs(tail(envs), cons(head(envs), updated)))
+                };
+                rebuildEnvs(envs, cons()) // Start with an empty list
+            };
+            // Perform the rebind operation
+            currentEnv = rebindInEnvs(currentEnv)
+        };
+
+        //apply let expressions
+        def applyLet = lambda(exp) {
+            let identifier = head(tail(head(exp)));
+            let value = head(tail(exp));
+            extend();
+            bind(identifier, value);
+            eval(value)
+        };
+
+        //apply assignment expressions
+        def applyAssignment = lambda(exp) {
+            let identifier = head(tail(head(exp)));
+            let value = head(tail(exp));
+            rebind(identifier, value);
+            eval(value)
+        };
+
+        //do function application
+        def applyFunction = lambda(exp) {
+            let identifier = head(tail(head(exp)));
+            let operator = lookup(identifier);
+            cond
+                (equals?(head(operator), EXP_PROCEDURE) => {
+                    let procedure = head(tail(operator));
+                    let operands = evalArgsForProcedure(tail(head(tail(exp))));
+                    //print("Evaluating function call: ", identifier, " with args: ", operands, "\n");
+                    let result = eval(wrapRaw(map(procedure, operands)));
+                    result
+                })
+                (equals?(head(operator), EXP_FUNC) => {
+                    let params = tail(head(tail(operator)));
+                    let block = head(tail(tail(operator)));
+                    let operands = evalArgs(tail(head(tail(exp))));
+                    extendParams(params, operands);
+                    //print("Evaluating function call: ", identifier, " with args: ", operands, "\n");
+                    let result = eval(block);
+                    pop();
+                    result
+                })
+        };
+
+        //gets list of all arguments evaluated
+        def evalArgs = lambda(arglist) {
+            let newArgs = cons();
+            let evalArgsRecursively = lambda(args) {
+                cond
+                    (isEmpty?(args) => newArgs)
+                    (true => {
+                        newArgs = cons(eval(head(args)), newArgs);
+                        evalArgsRecursively(tail(args))
+                    })
+            };
+            reverse(evalArgsRecursively(arglist))
+        };
+
+        //gets list of all arguments evaluated
+        def evalArgsForProcedure = lambda(arglist) {
+            let newArgs = cons();
+            let evalArgsRecursively = lambda(args) {
+                cond
+                    (isEmpty?(args) => newArgs)
+                    (true => {
+                        let evaluated = eval(head(args));
+                        newArgs = cons(getRaw(evaluated), newArgs);
+                        evalArgsRecursively(tail(args))
+                    })
+            };
+            reverse(evalArgsRecursively(arglist))
+        };
+
+        //applys conditional statement
+        def applyConditional = lambda(clauses) {
+            let exp = wrapRaw(false);
+            let evaluateClauses = lambda(clauses) {
+                cond
+                    (isEmpty?(clauses) => exp)
+                    (true => {
+                        let clause = head(clauses);
+                        let condition = eval(head(tail(clause)));
+                        cond
+                            (getRaw(condition) => eval(head(tail(tail(clause)))))
+                            (true => evaluateClauses(tail(clauses)))
+                    })
+            };
+            let value = evaluateClauses(clauses);
+            value
+        };
+
+        //executes block
+        def executeBlock = lambda(block) {
+            let exp = wrapRaw(false);
+            let executeBlockRecursively = lambda(block) {
+                cond
+                    //return last eval expression
+                    (isEmpty?(block) => exp)
+                    //evaluate next expression
+                    (true => {
+                        exp = eval(head(block));
+                        executeBlockRecursively(tail(block))
+                    })
+            };
+            executeBlockRecursively(block)
+        };
+
+        //program is list of expressions
+        def executeProgram = lambda(program) {
+            let exp = wrapRaw(false);
+            let executeProgramRecursively = lambda(program) {
+                cond
+                    //return last eval expression
+                    (isEmpty?(program) => exp)
+                    //evaluate next expression
+                    (true => {
+                        exp = eval(head(program));
+                        executeProgramRecursively(tail(program))
+                    })
+            };
+            executeProgramRecursively(program)
+        };
+
+        //returns raw value of expression
+        def getRaw = lambda(exp) {
+            let type = head(exp);
+            cond
+                (or?(equals?(type, EXP_INT), equals?(type, EXP_STR), equals?(type, EXP_BOOL), equals?(type, EXP_PROCEDURE)) => head(tail(exp)))
+                (true => fail("Error: expression ", type, " could not be converted to raw."))
+        };
+
+        //wraps raw data types with expression tag
+        def wrapRaw = lambda(exp) {
+            let type = type(exp);
+            cond
+                (equals?(type, "INTEGER") => vector(EXP_INT, exp))
+                (equals?(type, "PROCEDURE") => vector(EXP_PROCEDURE, exp))
+                (equals?(type, "STRING") => vector(EXP_STR, exp))
+                (equals?(type, "BOOLEAN") => vector(EXP_BOOL, exp))
+                (true => fail("Error: expression ", type, " could not be wrapped from raw."))
+        };
+
+        //evaluate AST recursively
+        def eval = lambda(exp) {
+            //print("evaluating: ", exp, "\n");
+            cond
+                //is int?
+                (equals?(head(exp), EXP_INT) => exp)
+                //is a string?
+                (equals?(head(exp), EXP_STR) => exp)
+                //is a boolean?
+                (equals?(head(exp), EXP_BOOL) => exp)
+                //is a procedure?
+                (equals?(head(exp), EXP_PROCEDURE) => exp)
+                //is a function?
+                (equals?(head(exp), EXP_FUNC) => exp)
+                //evaluate an identifier (lookup its value)
+                (equals?(head(exp), EXP_IDENT) => eval(lookup(head(tail(exp)))))
+                //evaluate LET expression
+                (equals?(head(exp), EXP_LET) => applyLet(tail(exp)))
+                //evaluate ASSIGN expression
+                (equals?(head(exp), EXP_ASSIGN) => applyAssignment(tail(exp)))
+                //evaluate FUNCTION application
+                (equals?(head(exp), EXP_APP) => applyFunction(tail(exp)))
+                //evaluate CONDITIONAL
+                (equals?(head(exp), EXP_COND) => applyConditional(tail(exp)))
+                //evaluate BLOCK
+                (equals?(head(exp), EXP_BLOCK) => executeBlock(tail(exp)))
+                //evalaute program
+                (equals?(head(exp), EXP_PROGRAM) => executeProgram(tail(exp)))
+                (true => {
+                    fail("Error: Unexpected expression ", exp)
+                })
+        };
+
+        eval(ast)
+    };
+
+//---------------------------------------------------------------------------------------------------
+// Main
+//---------------------------------------------------------------------------------------------------
+
+    let printExpressions = lambda(ast) {
+        cond
+            (isEmpty?(ast) => "done")
+            (true => {
+                print(head(ast));
+                printExpressions(tail(ast))
+            })
+    };
+    
+    //get exp to print
+    def getPrint = lambda(exp) {
+        let type = head(exp);
+        cond
+            (or?(equals?(type, EXP_INT), equals?(type, EXP_STR), equals?(type, EXP_BOOL), equals?(type, EXP_PROCEDURE)) => head(tail(exp)))
+            (true => exp)
+    };
+
+    let main = lambda() {
+        let file = "./example-program/demo.heath";
+        let input = readFile(file);
+        let tokens = tokenize(input);
+        //print("TOKENS:\n", tokens);
+        let ast = parse(tokens);
+        //print("\nAST:\n", ast);
+        let exp = interpret(ast);
+        getPrint(exp)
+    };
+
+    main()
+}

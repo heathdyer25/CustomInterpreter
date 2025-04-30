@@ -1,11 +1,14 @@
+package parser;
+
 import expressions.*;
 import lexer.Lexer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import parser.Parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+
 
 public class ParserTest {
     private Lexer lexer;
@@ -80,9 +83,6 @@ public class ParserTest {
         Expression exp = parser.parse(lexer.lex("add(1, 2)"));
         System.out.println(exp.toString());
         assertEquals(ExpressionType.APPLICATION, exp.getType());
-
-//        exp = parser.parse(lexer.lex("testing"));
-//        assertEquals(ExpressionType.APPLICATION, exp.getType());
     }
 
 

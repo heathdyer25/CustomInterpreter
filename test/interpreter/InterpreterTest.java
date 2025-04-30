@@ -1,8 +1,9 @@
+package interpreter;
+
 import expressions.Expression;
 import expressions.ExpressionType;
 import expressions.IntegerExpression;
 import expressions.StringExpression;
-import interpreter.Interpreter;
 import lexer.Lexer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

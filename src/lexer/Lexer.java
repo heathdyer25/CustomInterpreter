@@ -6,7 +6,9 @@ import java.util.List;
 import static main.Util.*;
 
 /**
- * Lexer class for 417 language.
+ * Lexer class for the custom language. Reads source code and
+ * translates it to a list of tokens for the parser to read.
+ * @author Heath Dyer
  */
 public class Lexer {
     /**
@@ -308,19 +310,19 @@ public class Lexer {
         int start = current;
         if (predicateOpenParen(current)) {
             current++;
-            return new Token(TokenType.TOKEN_OPENPAREN, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.OPENPAREN, start, 1, line, source.substring(start, current));
         }
         if (predicateCloseParen(current)) {
             current++;
-            return new Token(TokenType.TOKEN_CLOSEPAREN, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.CLOSEPAREN, start, 1, line, source.substring(start, current));
         }
         if (predicateOpenBrace(current)) {
             current++;
-            return new Token(TokenType.TOKEN_OPENBRACE, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.OPENBRACE, start, 1, line, source.substring(start, current));
         }
         if (predicateCloseBrace(current)) {
             current++;
-            return new Token(TokenType.TOKEN_CLOSEBRACE, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.CLOSEBRACE, start, 1, line, source.substring(start, current));
         }
         if (predicateWhitespace(current)) {
             return lexWhitespace();
@@ -333,26 +335,26 @@ public class Lexer {
         }
         if (predicateComma(current)) {
             current++;
-            return new Token(TokenType.TOKEN_COMMA, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.COMMA, start, 1, line, source.substring(start, current));
         }
         if (predicateSemicolon(current)) {
             current++;
-            return new Token(TokenType.TOKEN_SEMICOLON, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.SEMICOLON, start, 1, line, source.substring(start, current));
         }
         if (predicateArrow(current)) {
             current += 2;
-            return new Token(TokenType.TOKEN_ARROW, start, 2, line, source.substring(start, current));
+            return new Token(TokenType.ARROW, start, 2, line, source.substring(start, current));
         }
         if (predicateEquals(current)) {
             current++;
-            return new Token(TokenType.TOKEN_EQUALS, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.EQUALS, start, 1, line, source.substring(start, current));
         }
         if (predicateComment(current)) {
             return lexComment();
         }
         if (predicateEOF(current)) {
             current++;
-            return new Token(TokenType.TOKEN_EOF, start, 1, line, source.substring(start, current));
+            return new Token(TokenType.EOF, start, 1, line, source.substring(start, current));
         }
         return lexIdentifier();
     }
@@ -374,7 +376,7 @@ public class Lexer {
         }
         // Integer is only plus or minus?
         if ((predicateMinus(start) || predicatePlus(start)) && current - start == 1) {
-            return new Token(TokenType.TOKEN_BAD_INTCHAR, start, current - start, line, source.substring(start, current));
+            return new Token(TokenType.BAD_INTCHAR, start, current - start, line, source.substring(start, current));
         }
         // Something went wrong...
         if (current == start) {
@@ -382,9 +384,9 @@ public class Lexer {
         }
         // Identifier exceeds max set length
         if (current - start > MAX_INTLEN) {
-            return new Token(TokenType.TOKEN_BAD_INTLEN, start, current - start, line, source.substring(start, current));
+            return new Token(TokenType.BAD_INTLEN, start, current - start, line, source.substring(start, current));
         }
-        return new Token(TokenType.TOKEN_INTEGER, start, current - start, line, source.substring(start, current));
+        return new Token(TokenType.INTEGER, start, current - start, line, source.substring(start, current));
     }
 
     /**
@@ -396,12 +398,12 @@ public class Lexer {
      */
     private TokenType isKeyword(String str) {
         return switch (str) {
-            case KEYWORD_LAMBDA -> TokenType.TOKEN_LAMBDA;
-            case KEYWORD_LAMBDA_ALT -> TokenType.TOKEN_LAMBDA_ALT;
-            case KEYWORD_DEFINITION -> TokenType.TOKEN_DEFINITION;
-            case KEYWORD_COND -> TokenType.TOKEN_COND;
-            case KEYWORD_LET -> TokenType.TOKEN_LET;
-            default -> TokenType.TOKEN_IDENTIFIER;
+            case KEYWORD_LAMBDA -> TokenType.LAMBDA;
+            case KEYWORD_LAMBDA_ALT -> TokenType.LAMBDA_ALT;
+            case KEYWORD_DEFINITION -> TokenType.DEFINITION;
+            case KEYWORD_COND -> TokenType.COND;
+            case KEYWORD_LET -> TokenType.LET;
+            default -> TokenType.IDENTIFIER;
         };
     }
 
@@ -424,7 +426,7 @@ public class Lexer {
         }
         // Identifier exceeds max set length
         if (current - start > MAX_IDLEN) {
-            return new Token(TokenType.TOKEN_BAD_IDLEN, start, current - start, line, source.substring(start, current));
+            return new Token(TokenType.BAD_IDLEN, start, current - start, line, source.substring(start, current));
         }
         return new Token(isKeyword(string.toString()), start, current - start, line, source.substring(start, current));
     }
@@ -475,18 +477,18 @@ public class Lexer {
         }
         //String too long?
         if (current - start > MAX_STRLEN) {
-            return new Token(TokenType.TOKEN_BAD_STRLEN, start, current - start, line, str.toString());
+            return new Token(TokenType.BAD_STRLEN, start, current - start, line, str.toString());
         }
         // String ends with EOF
         if (predicateEOF(current)) {
-            return new Token(TokenType.TOKEN_BAD_STREOF, start, ++current - start, line, str.toString());
+            return new Token(TokenType.BAD_STREOF, start, ++current - start, line, str.toString());
         }
         // String ends with quote?
         if (predicateQuote(current)) {
-            return new Token(TokenType.TOKEN_STRING, start, ++current - start, line, str.toString());
+            return new Token(TokenType.STRING, start, ++current - start, line, str.toString());
         }
         // Some unhandled string condition
-        return new Token(TokenType.TOKEN_PANIC, start, current - start, line, str.toString());
+        return new Token(TokenType.PANIC, start, current - start, line, str.toString());
     }
 
     /**
@@ -503,9 +505,9 @@ public class Lexer {
         }
         // Called when no whitespace?
         if (current == start) {
-            return new Token(TokenType.TOKEN_PANIC, start, 0, line, source.substring(start, 0));
+            return new Token(TokenType.PANIC, start, 0, line, source.substring(start, 0));
         }
-        return new Token(TokenType.TOKEN_WS, start, current - start, line, source.substring(start, current));
+        return new Token(TokenType.WS, start, current - start, line, source.substring(start, current));
     }
 
     /**
@@ -526,6 +528,6 @@ public class Lexer {
         if (current == start) {
             throw new RuntimeException("lexComment() called went it shouldn't have been");
         }
-        return new Token(TokenType.TOKEN_COMMENT, start, current - start, line, source.substring(start, current));
+        return new Token(TokenType.COMMENT, start, current - start, line, source.substring(start, current));
     }
 }

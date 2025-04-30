@@ -86,7 +86,7 @@ public abstract class IOProcedures {
         }
         //Catch IO errors
         catch (IOException e) {
-            throw new RuntimeException("Error occured while reading input from terminal.");
+            throw new RuntimeException("Error occurred while reading input from terminal.");
         }
         //return as expression
         return new StringExpression(input.toString());

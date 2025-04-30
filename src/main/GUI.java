@@ -16,6 +16,10 @@ import java.nio.file.Files;
 
 import static parser.Desugar.desugar;
 
+/**
+ * GUI for our interpreter.
+ * @author Heath Dyer
+ */
 public class GUI extends JFrame {
     /**
      * Where the code goes
@@ -211,6 +215,10 @@ public class GUI extends JFrame {
         }
     }
 
+    /**
+     * Runs and opens the GUI
+     * @param args Arguments from terminal
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             GUI ide = new GUI();

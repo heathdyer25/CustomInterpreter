@@ -1,5 +1,10 @@
 package lexer;
 
+/**
+ * Token class for Lexer. Represents meaningful lexical tokens
+ * for our parser to use.
+ * @author Heath Dyer
+ */
 public class Token {
     /**
      * Type of token
@@ -28,6 +33,8 @@ public class Token {
      * @param type Type of token
      * @param pos  Position in the string of the token
      * @param len  Length of the token
+     * @param line Line number of token in source code
+     * @param value Contents of string
      */
     public Token(TokenType type, int pos, int len, int line, String value) {
         this.type = type;
@@ -46,18 +53,34 @@ public class Token {
         return this.type;
     }
 
+    /**
+     * Returns length of token in characters
+     * @return length of token in characters
+     */
     public int getLength() {
         return this.len;
     }
 
+    /**
+     * Gets start position of token in the source string.
+     * @return Start position of token in source string
+     */
     public int getPosition() {
         return this.pos;
     }
 
+    /**
+     * Gets line number of token in the source string.
+     * @return Line number of token in source string
+     */
     public int getLine() {
         return this.line;
     }
 
+    /**
+     * Gets string contents of token.
+     * @return String contents of token
+     */
     public String getValue() {
         return this.value;
     }
